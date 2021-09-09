@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Tank Game Collab</title>
+	<script src="https://cdn.jsdelivr.net/gh/Steffan153/files/p5-ka.js"></script>
+	<style>
+		body {
+			background-color: black;
+			overflow: hidden;
+		}
+		canvas {
+			position: absolute;
+		}
+	</style>
+</head>
+<body>
+  <script>
+var keys = [];
+function keyPressed() {
+	keys[keyCode] = true;
+}
+function keyReleased() {
+	keys[keyCode] = false;
+}
+
+var charKey = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=`~[]{};:./<>';
+var decompressBitmap;
+var drawBitmap;
+
+var scene = 1;
+
+var player = {
+	x: 200,
+	y: 200,
+	w: 75,
+	h: 75,
+	speed: 3,
+	dir: 1,
+	currSprite: 0,
+	sprites: [
+	  'ƫƫƫ®®®ðĄĎĆ¼¼ĭÁÁë¸¸ŤÉÉĭÂÂÝëòÜéðë¶¶!a´b¾a°,a³b¯c½d¯b¯a¯,a²b¯e¯d¯c¯d¯e¯c¯d¯e¯c¯d°c¯d¯e¯c¯d±b¯,a²b¯d°c¯d°c¯d°c¯d°c¯d°c¯d¯f°b¯,a²b¯d¯b¾f¯b¯,a²b¯d¯b¯g¹h°d¯b¯f¯b¯,a²b¯d¯b¯h¼b¯f¯b¯,a²b¯d¯b¯h¯b½a¯,a³b°h¯b¯g¸h°d¯b¯a¯,a´b¯h¯b¯h»b¯a¯,a¯bÅ,b¯i·g°e´h°d°f¯b¯,b¯c¹j¯gµh°d¯b¯,b¯i·g¹h°b¯,a¯bÅ,a´b¯h¯b¯h»b¯a¯,a³b°h¯b¯g¹h°b¯a¯,a²b¯d¯b¯h¯b½a¯,a²b¯d¯b¯h¼b¯f¯b¯,a²b¯d¯b¯g¸h²b¯f¯b¯,a²b¯d¯b¾k¯b¯,a²b¯d°c¯d°c¯d°c¯d°c¯d°c¯d¯k°b¯,a²b¯e¯d¯c¯d¯e¯c¯d¯e¯c¯d¯e¯c¯d¯e¯c¯d±b¯,a³b¯c½d¯b¯a¯,a´b¾a°,',
+	  'ƫƫƫ®®®ðĄĎĆ¼¼ĭÂÂĭÁÁë¸¸ŤÉÉÝëòÜéðë¶¶!a³b¿a°,a²b¯c¿b¯a¯,a²b¯c¯d°c¯d°c¯d°c¯d°c¯d°c¯e¯d¯b¯,a²b¯c¯d¯f¯c¯d¯f¯c¯d¯f¯c¯d¯f¯c¯d¯f¯c¯g°b¯,a²b¯c¯b¾g¯b¯,a²b¯c¯b¯h¹e°d¯b¯g¯b¯,a²b¯c¯b¯e¼b¯g¯b¯,a²b¯c¯b¯e¯b½a¯,a³b°e¯b¯h¸e°d¯b¯a¯,a´b¯e¯b¯e»b¯a¯,a¯bÅ,b¯i·h°f´e°d°g¯b¯,b¯c¹j¯hµe°d¯b¯,b¯i·h¹e°b¯,a¯bÅ,a´b¯e¯b¯e»b¯a¯,a³b°e¯b¯h¹e°b¯a¯,a²b¯c¯b¯e¯b½a¯,a²b¯c¯b¯e¼b¯g¯b¯,a²b¯c¯b¯h¸e²b¯g¯b¯,a²b¯c¯b¾d¯b¯,a²b¯c¯d°c¯k¯d¯c¯d°c¯d°c¯d°c¯d°b¯,a²b¯c¯d¯f¯c¯d¯f¯c¯d¯f¯c¯d¯f¯c¯d¯f¯c¯d¯e¯b¯,a²b¯c¿b¯a¯,a³b¿a°,'
+	 ]
+};
+
+var obstacles = [];
+
+var drawPlayer;
+var updatePlayer;
+
+var drawObstacles;
+
+var rect_rectCollide;
+
+var GFXScl;
+function setupMyCanvas(width_, height_, type, scaleCanvas, FPS) {
+	if(!type) {
+		type = P2D;
+	}
+	if(!scaleCanvas) {
+		scaleCanvas = false;
+	}
+	if(!FPS) {
+		FPS = 60;
+	}
+	
+	window.addEventListener("keydown", function(e) {
+		if(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.code) > -1) {
+			e.preventDefault();
+		}
+	}, false);
+	
+	var ratio = width_ / height_;
+	var sz = windowHeight;
+	if(sz * ratio > windowWidth) {
+		sz = windowWidth * (height_ / width_);
+	}
+	
+	var canvas;
+	if(scaleCanvas) {
+		canvas = createCanvas(sz * ratio, sz, type);
+		GFXScl = sz / height_;
+	} else {
+		canvas = createCanvas(width_, height_, type);
+		GFXScl = 1;
+	}
+	
+	canvas.id("myCanvas");
+	canvas.position((windowWidth - width) / 2, (windowHeight - height) / 2);
+	
+	frameRate(FPS);
+	angleMode(DEGREES);
+}
+
+function setup() {
+	setupMyCanvas(600, 600, P2D, false);
+	
+	decompressBitmap = function(bitmap) {
+		function decompress(symbol) {
+			return symbol.charCodeAt() - 174;
+		}
+		bitmap = bitmap.split("!");
+		var colorData = bitmap[0];
+		var pixelData = bitmap[1].split(",");
+		var newBitmap = [
+			[color(0, 0, 0, 0)]
+		];
+		for(var i = 3; i < colorData.length; i += 3) {
+			var r = decompress(colorData.charAt(i)),
+				g = decompress(colorData.charAt(i + 1)),
+				b = decompress(colorData.charAt(i + 2));
+			newBitmap[0].push(color(r, g, b));
+		}
+		for(var k = 0; k < pixelData.length; k++) {
+			newBitmap.push("");
+			for(var i = 0; i < pixelData[k].length; i += 2) {
+				var repeatNTimes = decompress(pixelData[k].charAt(i + 1));
+				var symbol = pixelData[k].charAt(i);
+				for(var j = 0; j < repeatNTimes; j++) {
+					newBitmap[newBitmap.length - 1] += symbol;
+				}
+			}
+		}
+		return newBitmap;
+	};
+	drawBitmap = function(bitmap, x, y, s) {
+		noStroke();
+		for(var row = 1; row < bitmap.length; row++) {
+			for(var indx = 0; indx < bitmap[row].length; indx++) {
+				fill(bitmap[0][charKey.indexOf(bitmap[row].charAt(indx))]);
+				rect(x + (row - 1) * s, y + indx * s, s, s);
+			}
+		}
+	};
+	
+	player.sprites[0] = decompressBitmap(player.sprites[0]);
+	player.sprites[1] = decompressBitmap(player.sprites[1]);
+
+	rect_rectCollide = function(x1, y1, w1, h1, x2, y2, w2, h2) {
+		return !(x1 + w1 < x2 || x1 > x2 + w2 || y1 + h1 < y2 || y1 > y2 + h2);
+	};
+	
+	for(var i = 0; i < 20; i++) {
+		obstacles.push({
+			x: round(random(0, 600)),
+			y: round(random(0, 600)),
+			w: round(random(25, 75)),
+			h: round(random(25, 75)),
+		});
+	}
+
+	drawPlayer = function() {
+		noStroke();
+		fill(0, 0, 255);
+		rect(player.x, player.y, player.w, player.h);
+		
+		push();
+		  translate(player.x + player.w / 2, player.y + player.h / 2);
+		  rotate(player.dir * 90);
+		  drawBitmap(player.sprites[player.currSprite], -player.w / 2, -player.h / 2, 3);
+		pop();
+		
+	};
+	
+	drawObstacles = function() {
+		noStroke();
+		fill(0, 0, 0);
+		for(var i = 0; i < obstacles.length; i++) {
+			var obj = obstacles[i];
+			rect(obj.x, obj.y, obj.w, obj.h);
+		}
+	};
+	
+	updatePlayer = function() {
+		//move x
+		if(keys[LEFT_ARROW] || keys[65]) {
+			player.x -= player.speed;
+			player.dir = 3;
+		}
+		if(keys[RIGHT_ARROW] || keys[68]) {
+			player.x += player.speed;
+			player.dir = 1;
+		}
+		
+		// constrain x
+		if (player.x < 0) {
+		  player.x = 0;
+		}
+		if (player.x > width - player.w) {
+		  player.x = width - player.w;
+		}
+		
+		//x collisions
+		for(var i = 0; i < obstacles.length; i++) {
+			var obj = obstacles[i];
+			if(rect_rectCollide(obj.x, obj.y, 1, obj.h, player.x, player.y, player.w, player.h)) {
+				player.x += obj.x - (player.x + player.w) - 1;
+			}
+			if(rect_rectCollide(obj.x + obj.w - 1, obj.y, 1, obj.h, player.x, player.y, player.w, player.h)) {
+				player.x += (obj.x + obj.w) - player.x + 1;
+			}
+		}
+		
+		
+		//move y
+		if(keys[UP_ARROW] || keys[87]) {
+			player.y -= player.speed;
+			player.dir = 0;
+		}
+		if(keys[DOWN_ARROW] || keys[83]) {
+			player.y += player.speed;
+			player.dir = 2;
+		}
+		
+		// constrain y
+		if (player.y < 0) {
+		  player.y = 0;
+		}
+		if (player.y > height - player.h) {
+		  player.y = height - player.h;
+		}
+		
+		//y collisions
+		for(var i = 0; i < obstacles.length; i++) {
+			var obj = obstacles[i];
+			if(rect_rectCollide(obj.x, obj.y, obj.w, 1, player.x, player.y, player.w, player.h)) {
+				player.y += obj.y - (player.y + player.h) - 1;
+			}
+			if(rect_rectCollide(obj.x, obj.y + obj.h - 1, obj.w, 1, player.x, player.y, player.w, player.h)) {
+				player.y += (obj.y + obj.h) - player.y + 1;
+			}
+		}
+		
+		if ((keys[LEFT_ARROW] || keys[65] || keys[RIGHT_ARROW] || keys[68] || keys[UP_ARROW] || keys[87] || keys[DOWN_ARROW] || keys[83]) && frameCount % 3 === 0) {
+		  player.currSprite = (player.currSprite + 1) % player.sprites.length;
+		}
+		
+	};
+	
+}
+
+function draw() {
+	background(34, 171, 0);
+	updatePlayer();
+	drawObstacles();
+	drawPlayer();
+	
+	noStroke();
+	fill(255, 255, 255);
+	textSize(15);
+	text("FPS: " + round(frameRate() / 2) * 2, 10, 20);
+	text("Canvas Scale Factor: " + GFXScl, 10, 40);
+	
+	clicked = false;
+}
+
+  </script>
+</body>
+</html>
